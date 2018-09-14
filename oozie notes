@@ -1,0 +1,65 @@
+APACHE OOZIE:
+
+
+It has been
+designed to manage the executions of thousands of dependent workflows, each com-
+posed of possibly thousands of consistuent actions at the level of an individual Map-
+Reduce job.
+
+Oozie has two main parts: a workflow engine that stores and runs workflows composed
+of Hadoop jobs, and a coordinator engine that runs workflow jobs based on predefined
+schedules and data availability.
+The latter property is especially powerful since it allows
+a workflow job to wait until its input data has been produced by a dependent workflow;
+also, it make rerunning failed workflows more tractable, since no time is wasted running successful parts of a workflow.
+
+In Oozie parlance, a workflow is a DAG of action nodes and control-
+flow nodes. An action node performs a workflow task, like moving files in HDFS, run-
+ning a MapReduce, Streaming, Pig or Hive job, performing a Sqoop import, or running
+an arbitrary shell script or Java program. A control-flow node governs the workflow
+execution between actions by allowing such constructs as conditional logic (so different
+execution branches may be followed depending on the result of an earlier action node)
+or parallel execution. When the workflow completes, Oozie can make an HTTP call-
+back to the client to inform it of the workflow status. It is also possible to receive
+callbacks every time the workflow enters or exits an action node.
+
+
+This workflow has three control-flow nodes and one action node: a start control node,
+a map-reduce action node, a kill control node, and an end control node.
+
+All workflows must have one start and one end node. When the workflow job starts
+it transitions to the node specified by the start node (the max-temp-mr action in this
+example). A workflow job succeeds when it transitions to the end node. However, if
+the workflow job transitions to a kill node, then it is considered to have failed and
+reports an error message as specified by the message element in the workflow definition.
+The bulk of this workflow definition file specifies the map-reduce action. The first two
+elements, job-tracker and name-node , are used to specify the jobtracker to submit the
+job to, and the namenode (actually a Hadoop filesystem URI) for input and output
+data. Both are parameterized so that the workflow definition is not tied to a particular
+cluster (which makes it easy to test).
+
+
+The optional prepare element runs before the MapReduce job, and is used for directory
+deletion (and creation too, if needed, although that is not shown here). By ensuring
+that the output directory is in a consistent state before running a job, Oozie can safely
+rerun the action if the job fails.
+
+
+Packaging and deploying an Oozie workflow application
+
+A workflow application is made up of the workflow definition plus all the associated
+resources (such as MapReduce JAR files, Pig scripts, and so on), needed to run it.
+Applications must adhere to a simple directory structure, and are deployed to HDFS
+so that they can be accessed by Oozie. For this workflow application, we’ll put all of
+the files in a base directory called max-temp-workflow, as shown diagramatically here:
+max-temp-workflow/
+├── lib/
+│
+└── hadoop-examples.jar
+└── workflow.xml
+The workflow definition file workflow.xml must appear in the top-level of this directory.
+JAR files containing the application’s MapReduce classes are placed in the lib directory.
+Workflow applications that conform to this layout can be built with any suitable build
+tool, like Ant or Maven; you can find an example in the code that accompanies this
+book. Once an application has been built, it should be copied to HDFS using regular
+Hadoop tools.

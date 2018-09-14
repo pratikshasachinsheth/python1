@@ -1,0 +1,56 @@
+Strat zookeeper
+
+--- ./bin/zookeeper-server-start.sh -daemon config/zookeeper.properties 
+
+
+To start kafka
+
+--- ./bin/kafka-server-start.sh -daemon config/server.properties 
+
+To check zookeeper is running or not
+
+--- netstat -tlunp | grep 2181
+
+Kafka running or not
+
+--- netstat -tlunp | grep 9092
+
+
+
+To create topic
+
+---  bin/kafka-topics.sh --create --topic my_topic --zookeeper localhost:2181 --replication-factor 1 --partitions 1
+
+To list Topics
+
+--- $ bin/kafka-topics.sh --list --zookeeper localhost 2181
+
+
+To start producer 
+
+--- bin/kafka-console-producer.sh --broker-list localhost:9092 --topic my_topic
+
+
+To start consumer
+
+--- bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic my_topic --from-beginning
+
+
+To create replicated topics:
+
+--- bin/kafka-topics.sh --create --topic replica_topic --zookeeper localhost:2181 --replication-factor 3 --partitions 1
+
+For creating 3 partitioning :
+
+1. create 3 server.properties.
+2. change 1. broker.id=0
+	  2.port=9092
+	  3. log.dirs=/tmp/kafka-logs-0
+bin/kafka-console-producer.sh --broker-list localhost:9092,localhost:9093,localhost:9094 --topic replica_topic
+
+
+bin/kafka-console-consumer.sh --bootstrap-server localhost:9092,localhost:9093,localhost:9094 --topic replica_topic --from-beginning
+
+For Adding New Partitions:
+
+--- bin/kafka-topics.sh --zookeeper localhost:2181 --alter --topic my-topic --partitions 4

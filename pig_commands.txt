@@ -1,0 +1,110 @@
+
+grunt> REGISTER /opt/hadoop/pig/contrib/piggybank/java/piggybank.jar;
+a = load '/home/icpl12900/Desktop/data_files/prat.csv' using  org.apache.pig.piggybank.storage.CSVExcelStorage() as (id:int,name:chararray,college,date1:int,year:int);
+grunt> b = foreach a generate id;
+
+grunt> b = foreach a generate id*2;
+grunt> dump b;
+
+grunt> c = foreach a generate SUBSTRING(name,0,2);
+
+grunt> dump c;
+
+grunt> d = foreach a generate REPLACE(name,'a','@');
+
+grunt> dump d;
+
+grunt> con = filter a by id > 2;
+
+grunt> dump con;
+
+grunt> con_match = filter a by college matches '.*coe.*';
+
+grunt> dump con_match;
+
+grunt> split a into coep if(college == 'coep'), iope if(college=='iope');
+
+grunt> dump coep;
+
+grunt> dump iope;
+
+grunt> dump a;
+
+grunt> grp = group a by id;
+
+grunt> sum1 = foreach grp generate COUNT(a); /*group is needed*/
+
+grunt> describe sum1;
+
+grunt> dump sum1;
+
+grunt> describe grp;
+
+grunt> describe a;
+
+grunt> b = foreach a generate id;
+
+grunt> dump b;
+
+grunt> grp_b = group b by id;
+
+grunt> describe grp_b;
+
+grunt> dump grp_b;
+
+grunt> sum_grp_b = foreach grp_b generate SUM(b);
+
+grunt> dump sum_grp_b;
+
+grunt> join1 = join a by b;
+
+grunt> join1 = join a by id, b by id;
+
+grunt> describe join1;
+
+grunt> dump join1;
+
+grunt> join_data = foreach join1 generate a::id,name,b::id;
+
+grunt> dump join_data;
+
+grunt> cross1 = cross a,b;
+
+grunt> dump cross1;
+
+grunt> u = union onschema a,b;
+
+grunt> u = union a,b;
+grunt> dump u;
+
+grunt> u1 = union a, grp_id;
+
+grunt> u1 = union onschema a, grp_b;
+
+grunt> dump u1;
+
+grunt> u2 = union onschema grp,grp_b;
+grunt> dump u2;
+grunt> u = union a,b;
+grunt> flat = foreach grp generate group, flatten(a);
+grunt> bag1 = foreach a generate id,name, TOBAG(college,date1) as clg,year;
+grunt> dump bag1;
+grunt> flat1 = foreach bag1 generate id,name, flatten(clg);
+grunt> dump grp;
+grunt> describe grp;
+grunt> for1 = foreach grp {sum1 = SUM(a.date1); ord = order grp by id desc; lim = limit grp 2; generate sum1};
+
+
+
+
+
+WORDCOUNT PROGRAM
+ twinkle = load '/home/icpl12900/Desktop/twinkle.txt' as (line:chararray);
+2   words = foreach twinkle generate TOKENIZE(line) as bag_word;
+3   words = foreach twinkle generate TOKENIZE(line);
+4   words = foreach twinkle generate TOKENIZE(line) as bag_word;
+5   each_word = foreach words generate flatten(bag_word) as each;
+6   grp_word = group each_word by each;
+7   count_word = foreach grp_word generate group,COUNT(each_word.each);
+
+
